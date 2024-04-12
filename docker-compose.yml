@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  # Proxies requests to internal services
+  # Proxy
   reverseproxy:
     image: nginx:latest
     container_name: reverseproxy
@@ -42,7 +42,7 @@ services:
       - 9000:9000
     restart: always
 
-  # webcamsrv
+  # WebCamSrv
   webcamsrv:
     image: webcamsrv:latest
     container_name: webcamsrv
