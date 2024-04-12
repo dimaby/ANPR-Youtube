@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   # Proxy
@@ -44,15 +44,18 @@ services:
 
   # WebCamSrv
   webcamsrv:
-    privileged: true
     image: webcamsrv:latest
     container_name: webcamsrv
-    devices:
-      - "/dev/video0:/dev/video0" 
     ports:
-      - 8088:8088
-    restart: always    
-
+      - "8088:8088"
+    devices:
+      - "/dev/video0:/dev/video0"
+    environment:
+      CAMERA_INDEX: "0"
+      CAMERA_WIDTH: "1280"
+      CAMERA_HEIGHT: "720"
+    restart: always
+    
   # RpiMonitor (https://github.com/michaelmiklis/docker-rpi-monitor)
   rpimonitor:
     image: michaelmiklis/rpi-monitor:latest
