@@ -1,8 +1,3 @@
-python3 WebCamSrv/webcamsrv.py  
-
-docker build -t camera-server webcamsrv/.
-docker run -p 8888:8888 --device /dev/video0:/dev/video0 -e CAMERA_INDEX=1 -e CAMERA_WIDTH=1280 -e CAMERA_HEIGHT=720 camera-server
-
 MacBook Pro Apple M1 Pro FaceTime HD camera 
 2.1МП (1920*1080)
 
@@ -15,3 +10,22 @@ MacBook Pro Apple M1 Pro FaceTime HD camera
 Модуль камеры Waveshare SC3336 3 Мп (B) с высокой чувствительностью, высоким SNR, низкой производительностью, совместим с серией LuckFox Pico (17 USD)
 3MP (2304*1296)
 
+git clone "https://github.com/dimaby/ANPR-Youtube"
+cd ANPR-Youtube
+git pull --force
+
+Локально:
+pip3 install matplotlib pytesseract opencv-python tornado
+python3 ~/ANPR-Youtube/WebCamSrv/webcamsrv.py
+python3 WebCamSrv/webcamsrv.py --camera_url "rtsp://<user>:<password>@<ip/host>"
+
+Собрать в докер:
+sudo chmod 666 /dev/video0
+docker build -t webcamsrv ~/ANPR-Youtube/WebCamSrv/.
+docker run -p 8888:8888 --device /dev/video0:/dev/video0 -e CAMERA_INDEX=0 -e CAMERA_WIDTH=1280 -e CAMERA_HEIGHT=720 webcamsrv
+
+как сервис
+docker run -d --restart always -p 8888:8888 --device /dev/video0:/dev/video0 webcamsrv
+docker ps
+docker stop <container_id_or_name>
+docker rm <container_id_or_name>
