@@ -22,7 +22,7 @@ class Camera:
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
 
-        self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 0)
+        self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         try:
             # Attempt to set timeout if supported
