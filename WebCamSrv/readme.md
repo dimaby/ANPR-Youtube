@@ -10,11 +10,11 @@ python3 WebCamSrv/webcamsrv.py --camera_url "rtsp://<user>:<password>@<ip/host>"
 Build in Docker:
 sudo chmod 666 /dev/video0
 docker build -t webcamsrv ~/ANPR-Youtube/WebCamSrv/.
-docker run -p 8888:8888 --device /dev/video0:/dev/video0 -e CAMERA_INDEX=0 -e CAMERA_WIDTH=1280 -e CAMERA_HEIGHT=720 webcamsrv
-docker run -p 8888:8888 --device /dev/video0:/dev/video0 -e CAMERA_RTSP_URL="rtsp://<user>:<password>@<ip/host>" webcamsrv
+docker run -p 8088:8088 --device /dev/video0:/dev/video0 -e CAMERA_INDEX=0 -e CAMERA_WIDTH=1280 -e CAMERA_HEIGHT=720 webcamsrv
+docker run -p 8088:8088 --device /dev/video0:/dev/video0 -e CAMERA_RTSP_URL="rtsp://<user>:<password>@<ip/host>" webcamsrv
 
 Run as a service:
-docker run -d --restart always -p 8888:8888 --device /dev/video0:/dev/video0 webcamsrv
+docker run -d --restart always -p 8088:8088 --device /dev/video0:/dev/video0 webcamsrv
 docker ps
 docker stop <container_id_or_name>
 docker rm <container_id_or_name>

@@ -82,8 +82,8 @@ if __name__ == "__main__":
 
     try:
         app = make_app(camera)
-        app.listen(8888)
-        print("Server is running on http://localhost:8888/")
+        app.listen(8088)
+        print("Server is running on http://localhost:8088/")
         tornado.ioloop.IOLoop.current().start()
     except KeyboardInterrupt:
         print("Shutting down the server.")
