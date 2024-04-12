@@ -16,12 +16,13 @@ class Camera:
         if self.camera_url:
             print(f"Initializing RTSP camera with URL: {self.camera_url}")
             self.camera = cv2.VideoCapture(self.camera_url)
-            self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 3)  
         else:
             print(f"Initializing local camera with index: {self.camera_index}")
             self.camera = cv2.VideoCapture(self.camera_index)
             self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
             self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+
+        self.camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         try:
             # Attempt to set timeout if supported
