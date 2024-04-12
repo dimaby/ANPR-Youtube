@@ -5,11 +5,11 @@ services:
   reverseproxy:
     image: nginx:latest
     container_name: reverseproxy
-    depends_on:
-        - noderedopigpio
-        - portainer
-        - webcamsrv
-        - rpimonitor
+    # depends_on:
+    #     - noderedopigpio
+    #     - portainer
+    #     - webcamsrv
+    #     - rpimonitor
     volumes:
       - ./ReverseProxy/nginx.conf:/etc/nginx/nginx.conf
       - ./ReverseProxy/headers.conf:/etc/nginx/headers.conf
