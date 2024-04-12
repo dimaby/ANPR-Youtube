@@ -1,0 +1,31 @@
+# Используем официальный образ Python как базовый
+FROM python:3.8-slim
+
+# Устанавливаем необходимые системные библиотеки
+RUN apt-get update && \
+    apt-get install -y libopencv-dev libsm6 libxext6 libxrender-dev tini && \
+    rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем OpenCV Python
+RUN pip install opencv-python-headless
+
+# Устанавливаем библиотеку Tornado
+RUN pip install tornado
+
+# Документируем использование переменных окружения
+ENV CAMERA_INDEX=0
+ENV CAMERA_WIDTH=640
+ENV CAMERA_HEIGHT=480
+
+# Копируем наш скрипт в контейнер
+COPY webcamsrv.py /app/webcamsrv.py
+
+# Открываем порт 8888
+EXPOSE 8888
+
+# Устанавливаем рабочий каталог
+WORKDIR /app
+
+# Запускаем сервер при старте контейнера через tini для лучшей обработки сигналов
+ENTRYPOINT ["/usr/bin/tini", "--"]
+CMD ["python", "webcamsrv.py"]
