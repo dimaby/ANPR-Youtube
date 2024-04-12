@@ -29,4 +29,3 @@ OV9732 USB IR Camera Module Auto Switch Day/Night Video Card 1MP Adjustable Focu
 1MP (1280*720)
 Waveshare SC3336 3MP (B) Camera Module High Sensitivity, High SNR, Low Performance, Compatible with LuckFox Pico Series (AliExpress 17 USD)
 3MP (2304*1296)
-

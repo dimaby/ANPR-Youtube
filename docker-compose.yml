@@ -44,6 +44,7 @@ services:
 
   # WebCamSrv
   webcamsrv:
+    privileged: true
     image: webcamsrv:latest
     container_name: webcamsrv
     devices:
