@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  # Proxies requests to internal services
+  reverseproxy:
+    image: nginx:latest
+    container_name: reverseproxy
+    depends_on:
+        - noderedopigpio
+        - portainer
+        - webcamsrv
+        - rpimonitor
+    volumes:
+      - ./ReverseProxy/nginx.conf:/etc/nginx/nginx.conf
+      - ./ReverseProxy/headers.conf:/etc/nginx/headers.conf
+    ports:
+      - 80:80
+    restart: always
+
+  # NodeRedOpiGpio
+  noderedopigpio:
+    image: noderedopigpio:latest
+    container_name: noderedopigpio
+    volumes:
+      - ./noderedopigpiodata:/data
+      - /sys/class/gpio:/sys/class/gpio
+    ports:
+      - 1880:1880
+    restart: always
+
+  # Portainer
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./portainerdata:/data
+    ports:
+      - 9000:9000
+    restart: always
+
+  # webcamsrv
+  webcamsrv:
+    image: webcamsrv:latest
+    container_name: webcamsrv
+    ports:
+      - 8088:8088
+    restart: always    
+
+  # RpiMonitor (https://github.com/michaelmiklis/docker-rpi-monitor)
+  rpimonitor:
+    image: michaelmiklis/rpi-monitor:latest
+    container_name: rpimonitor
+    volumes:
+      - /opt/vc:/opt/vc
+      - /boot:/boot
+      - /sys:/dockerhost/sys:ro
+      - /etc:/dockerhost/etc:ro
+      - /proc:/dockerhost/proc:ro
+      - /usr/lib:/dockerhost/usr/lib:ro
+    restart: always
+    ports:
+      - 8888:8888

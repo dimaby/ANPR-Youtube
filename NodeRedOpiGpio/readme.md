@@ -1,0 +1,1 @@
+docker build -t noderedopigpio ~/ANPR-Youtube/NodeRedOpiGpio/.
