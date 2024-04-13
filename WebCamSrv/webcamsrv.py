@@ -4,6 +4,7 @@ import cv2
 import os
 import argparse
 import time
+import numpy as np
 
 class Camera:
     def __init__(self, camera_index, camera_url, width, height):
@@ -56,28 +57,46 @@ class CameraHandler(tornado.web.RequestHandler):
     def get(self):
         start_time = time.time()
         detect = self.get_argument('detect', None)
+        crop = self.get_argument('crop', None)
         frame = self.camera.get_frame()
+        
         if frame is None:
             self.write("Failed to grab frame from camera.")
             return
 
         if detect == '1':
-            frame = self.detect_carplate(frame)
-            process_time = time.time() - start_time
-            print(f"Carplate detection and frame processing time: {process_time:.2f} seconds")
-        else:
-            process_time = time.time() - start_time
-            print(f"Frame processing time without detection: {process_time:.2f} seconds")
+            frame, carplate_img = self.detect_carplate(frame, crop == '1')
+
+            if crop == '1' and carplate_img is not None:
+                frame = self.resize_keep_aspect_ratio(carplate_img, 640, 480)
+
+        process_time = time.time() - start_time
+        print(f"Frame processing: {process_time:.2f} seconds")
 
         _, buffer = cv2.imencode('.jpg', frame)
         self.set_header('Content-Type', 'image/jpeg')
         self.write(buffer.tobytes())
 
-    def detect_carplate(self, image):
+    def resize_keep_aspect_ratio(self, carplate_img, target_width, target_height):
+        h, w = carplate_img.shape[:2]
+        scale = min(target_width / w, target_height / h)
+        
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+        resized_img = cv2.resize(carplate_img, (new_w, new_h))
+
+        return resized_img
+
+    def detect_carplate(self, image, crop):
         carplate_rects = self.carplate_haar_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5)
+        carplate_img = None
         for x, y, w, h in carplate_rects:
-            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Draw red rectangle
-        return image
+            if crop:
+                carplate_img = image[y:y+h, x:x+w]
+                return image, carplate_img
+            else:
+                cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Draw red rectangle
+        return image, carplate_img
 
 def make_app(camera, carplate_haar_cascade):
     return tornado.web.Application([
