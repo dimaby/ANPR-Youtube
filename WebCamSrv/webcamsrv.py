@@ -4,6 +4,7 @@ import cv2
 import os
 import argparse
 import time
+import pytesseract
 import numpy as np
 
 class Camera:
@@ -58,6 +59,7 @@ class CameraHandler(tornado.web.RequestHandler):
         start_time = time.time()
         detect = self.get_argument('detect', None)
         crop = self.get_argument('crop', None)
+        ocr = self.get_argument('ocr', None)
         frame = self.camera.get_frame()
         
         if frame is None:
@@ -69,6 +71,8 @@ class CameraHandler(tornado.web.RequestHandler):
 
             if crop == '1' and carplate_img is not None:
                 frame = self.resize_keep_aspect_ratio(carplate_img, 640, 480)
+                if ocr == '1':
+                    self.perform_ocr(carplate_img) 
 
         process_time = time.time() - start_time
         print(f"Frame processing: {process_time:.2f} seconds")
@@ -97,6 +101,14 @@ class CameraHandler(tornado.web.RequestHandler):
             else:
                 cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Draw red rectangle
         return image, carplate_img
+    
+    def perform_ocr(self, carplate_img):
+        carplate_extract_img_gray = cv2.cvtColor(carplate_img, cv2.COLOR_RGB2GRAY)
+        ocr_result = pytesseract.image_to_string(
+            carplate_extract_img_gray,
+            config='--psm 6 --oem 3 -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        )
+        print('Detected Plate Number:', ocr_result.strip())
 
 def make_app(camera, carplate_haar_cascade):
     return tornado.web.Application([

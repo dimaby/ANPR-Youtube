@@ -2,8 +2,9 @@ FROM python:3.8-slim
 
 # Install the necessary system libraries and OpenCV Python
 RUN apt-get update && \
-    apt-get install -y libopencv-dev libsm6 libxext6 libxrender-dev tini && \
-    pip install --no-cache-dir opencv-python-headless tornado && \
+    apt-get install -y libopencv-dev libsm6 libxext6 libxrender-dev tini \
+    tesseract-ocr tesseract-ocr-eng && \
+    pip install --no-cache-dir opencv-python-headless tornado pytesseract && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -13,7 +14,7 @@ ENV CAMERA_INDEX=0
 ENV CAMERA_WIDTH=640
 ENV CAMERA_HEIGHT=480
 
-# Copy script to the container
+# Copy script and models directory to the container
 COPY webcamsrv.py /app/webcamsrv.py
 COPY models /app/models
 
