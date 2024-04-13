@@ -100,6 +100,7 @@ if __name__ == "__main__":
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(current_dir, 'models', 'haarcascade_russian_plate_number.xml')
+    print("Loading Haar Cascade from:", model_path)
     carplate_haar_cascade = cv2.CascadeClassifier(model_path)
 
     camera = Camera(camera_index, camera_url, width, height)
