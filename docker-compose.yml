@@ -8,6 +8,7 @@ services:
         - portainer
         - webcamsrv
         - rpimonitor
+        - oalprws
     volumes:
       - ./ReverseProxy/nginx.conf:/etc/nginx/nginx.conf
       - ./ReverseProxy/headers.conf:/etc/nginx/headers.conf
@@ -15,7 +16,7 @@ services:
       - 80:80
     restart: always
 
-  # NodeRedOpiGpio
+  # noderedopigpio
   noderedopigpio:
     image: noderedopigpio:latest
     container_name: noderedopigpio
@@ -26,7 +27,7 @@ services:
       - 1880:1880
     restart: always
 
-  # Portainer
+  # portainer
   portainer:
     image: portainer/portainer-ce:latest
     container_name: portainer
@@ -40,7 +41,7 @@ services:
       - 9000:9000
     restart: always
 
-  # WebCamSrv
+  # webcamsrv
   webcamsrv:
     image: webcamsrv:latest
     container_name: webcamsrv
@@ -54,7 +55,7 @@ services:
       CAMERA_HEIGHT: "720"
     restart: always
     
-  # RpiMonitor (https://github.com/michaelmiklis/docker-rpi-monitor)
+  # rpimonitor (https://github.com/michaelmiklis/docker-rpi-monitor)
   rpimonitor:
     image: michaelmiklis/rpi-monitor:latest
     container_name: rpimonitor
@@ -68,3 +69,13 @@ services:
     restart: always
     ports:
       - 8888:8888
+
+  # oalprws
+  # http://oalprws:8080/v1/identify/plate
+  # method POST, parametr: image (binary image to recognition)
+  oalprws:
+    image: dimaby/oalprws:latest
+    container_name: oalprws
+    ports:
+      - "8080:8080"
+    restart: always
