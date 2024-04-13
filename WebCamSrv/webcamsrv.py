@@ -3,6 +3,7 @@ import tornado.web
 import cv2
 import os
 import argparse
+import time
 
 class Camera:
     def __init__(self, camera_index, camera_url, width, height):
@@ -32,7 +33,7 @@ class Camera:
 
         actual_width = self.camera.get(cv2.CAP_PROP_FRAME_WIDTH)
         actual_height = self.camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        print(f"Resolution: {actual_width}x{actual_height}")
+        print(f"Resolution set to: {actual_width}x{actual_height}")
 
     def get_frame(self):
         ret, frame = self.camera.read()
@@ -41,28 +42,46 @@ class Camera:
             self.camera.release()
             self.connect()
             ret, frame = self.camera.read()
-        return ret, frame
+        return frame
 
     def release(self):
         if self.camera.isOpened():
             self.camera.release()
 
 class CameraHandler(tornado.web.RequestHandler):
-    def initialize(self, camera):
+    def initialize(self, camera, carplate_haar_cascade):
         self.camera = camera
+        self.carplate_haar_cascade = carplate_haar_cascade
 
     def get(self):
-        ret, frame = self.camera.get_frame()
-        if not ret:
+        start_time = time.time()
+        detect = self.get_argument('detect', None)
+        frame = self.camera.get_frame()
+        if frame is None:
             self.write("Failed to grab frame from camera.")
             return
+
+        if detect == '1':
+            frame = self.detect_carplate(frame)
+            process_time = time.time() - start_time
+            print(f"Carplate detection and frame processing time: {process_time:.2f} seconds")
+        else:
+            process_time = time.time() - start_time
+            print(f"Frame processing time without detection: {process_time:.2f} seconds")
+
         _, buffer = cv2.imencode('.jpg', frame)
         self.set_header('Content-Type', 'image/jpeg')
         self.write(buffer.tobytes())
 
-def make_app(camera):
+    def detect_carplate(self, image):
+        carplate_rects = self.carplate_haar_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5)
+        for x, y, w, h in carplate_rects:
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # Draw red rectangle
+        return image
+
+def make_app(camera, carplate_haar_cascade):
     return tornado.web.Application([
-        (r"/", CameraHandler, {'camera': camera}),
+        (r"/", CameraHandler, {'camera': camera, 'carplate_haar_cascade': carplate_haar_cascade}),
     ])
 
 if __name__ == "__main__":
@@ -79,10 +98,14 @@ if __name__ == "__main__":
     width = args.width if args.width is not None else int(os.getenv('CAMERA_WIDTH', '1920'))
     height = args.height if args.height is not None else int(os.getenv('CAMERA_HEIGHT', '1080'))
 
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(current_dir, 'models', 'haarcascade_russian_plate_number.xml')
+    carplate_haar_cascade = cv2.CascadeClassifier(model_path)
+
     camera = Camera(camera_index, camera_url, width, height)
 
     try:
-        app = make_app(camera)
+        app = make_app(camera, carplate_haar_cascade)
         app.listen(8088)
         print("Server is running on http://localhost:8088/")
         tornado.ioloop.IOLoop.current().start()
